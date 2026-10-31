@@ -1,100 +1,161 @@
 # 电脑使用时间统计 | PC Screen Time Stats
 
 > 仿手机"屏幕使用时间"的 Windows 桌面小组件：常驻桌面层，实时统计各应用的前台使用时长，深浅色主题自动跟随系统。
-> A Windows desktop widget that mimics the phone "Screen Time" card: it stays on your desktop layer and tracks how long each app has been in the foreground, with automatic dark/light theme.
+
+**简体中文** · [ English](#english)
+
+---
 
 [![Build and Release](https://github.com/JegXiao/pc-usage-time-stats/actions/workflows/release.yml/badge.svg)](https://github.com/JegXiao/pc-usage-time-stats/actions/workflows/release.yml)
 
-## 下载 | Download
+## 下载
 
 最新版（自包含单文件，无需安装 .NET，下载后双击即用）：
-Latest release (self-contained single file, no .NET install needed—just download and run):
 
-- [最新版 | Latest](https://github.com/JegXiao/pc-usage-time-stats/releases/latest)
-- [最新版直链（文件名恒定） | Direct link (fixed filename)](https://github.com/JegXiao/pc-usage-time-stats/releases/latest/download/PCUsageTimeStats.exe)
+- [最新版](https://github.com/JegXiao/pc-usage-time-stats/releases/latest)
+- [最新版直链（文件名恒定）](https://github.com/JegXiao/pc-usage-time-stats/releases/latest/download/PCUsageTimeStats.exe)
 
 EXE 文件名恒定：升级时用新版覆盖旧文件即可，进程名与开机自启路径不变。版本号见 Release 标签与 EXE 文件属性。
-The EXE filename is fixed: to upgrade, overwrite the old file with the new one—the process name and autostart path never change. Version numbers live in Release tags and the EXE file properties.
 
-## 功能特性 | Features
+## 功能特性
 
 - **桌面小组件**：无边框圆角卡片常驻桌面层，普通窗口打开后自动盖在其上；不占任务栏，不抢焦点（`WS_EX_NOACTIVATE`）
-  **Desktop widget**: a borderless rounded card that lives on the desktop layer; regular windows cover it automatically. No taskbar entry, never steals focus (`WS_EX_NOACTIVATE`).
 - **与手机一致的统计口径**：只计"前台焦点应用"，多开不分摊、后台不计时；休眠/锁屏不计入；小组件自身永远不会被统计
-  **Phone-style accounting**: only the foreground app accumulates time. Background apps and sleep/lock time are excluded, and the widget never counts itself.
 - **详细统计窗口**：今天（24 小时柱状图，纵轴锁定 60 分钟、每 10 分钟一条网格线、峰值时段提示）/ 过去 7 天 / 过去 30 天（按数据峰值缩放、每小时网格线双数粗单数细、蓝色日均线），以及 Top 12 应用排行（进度条 + 悬停即时 Tooltip）
-  **Detail window**: Today (24-hour bars, y-axis locked at 60 min with gridlines every 10 min, peak-hour hint) / Last 7 days / Last 30 days (scaled to peak, hourly gridlines—thick on even hours, thin on odd—plus a blue daily-average line), and a Top-12 app ranking with progress bars and instant tooltips.
 - **深浅色自动跟随系统**：监听 `WM_SETTINGCHANGE`，切换无需重启
-  **Auto dark/light theme**: listens to `WM_SETTINGCHANGE`; switches instantly without restart.
 - **可拖动、可调大小**：屏幕绝对坐标拖动（不抖动）、右下角 ⤷ 进入调节模式（8 方向拖拽柄），始终限制在屏幕工作区内；两个窗口的位置和尺寸都会记忆
-  **Drag & resize**: jitter-free dragging via screen-absolute coordinates; a small ⤷ button enters resize mode (8 grip handles). Everything is clamped to the working area, and both windows remember their position and size.
 - **防呆设计**：托盘图标纯展示（无任何菜单），无界面退出入口，开机自启强制开启（写入 `HKCU` 注册表，无需管理员）
-  **Fool-proof**: tray icon is display-only (no menu), there is no in-app exit, and autostart is always enforced via the `HKCU` Run key (no admin rights needed).
 - **单实例**：重复点击快捷方式不会多开，而是唤出已运行的窗口
-  **Single instance**: launching it again just summons the running window instead of starting a copy.
 
-## 快速开始 | Quick Start
+## 快速开始
 
-### 环境要求 | Requirements
+### 环境要求
 
 - Windows 10 / 11
-- [.NET 9 桌面运行时 | .NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 9 桌面运行时](https://dotnet.microsoft.com/download/dotnet/9.0)
 - D 盘（数据目录固定为 `D:\电脑使用时间统计数据\`）
-  A D: drive (the data folder is fixed at `D:\电脑使用时间统计数据\`).
 
-### 从源码构建 | Build from source
+### 从源码构建
 
 ```bash
 git clone https://github.com/JegXiao/pc-usage-time-stats.git
 cd pc-usage-time-stats
 
-# 开发构建 | development build
+# 开发构建
 dotnet build
 
 # 发布单文件 exe（约 400 KB，输出到 电脑使用时间统计/bin/publish/）
-# Publish a single-file exe (~400 KB) to 电脑使用时间统计/bin/publish/
 dotnet publish 电脑使用时间统计/电脑使用时间统计.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o 电脑使用时间统计/bin/publish
 ```
 
 运行 exe 即可：首次启动会在任务栏托盘出现图标，小组件出现在桌面左上角。把 exe 放到任意固定位置（如 `D:\`），它每次启动都会自动刷新开机自启注册表项。
-Just run the exe: a tray icon appears and the widget shows up at the top-left of your desktop. Put the exe in a permanent location (e.g. `D:\`)—the autostart registry entry is refreshed on every launch.
 
 > 提示：框架依赖发布需要 .NET 9 桌面运行时；如需零依赖单文件，把上面命令改为 `--self-contained true`（体积约 150 MB）。
-> Tip: the framework-dependent build requires the .NET 9 Desktop Runtime; switch to `--self-contained true` for a zero-dependency file (~150 MB).
 
 输出目录的区别与本机安装更新的注意事项，见 [BUILD.md](BUILD.md)。
-For the differences between output directories and caveats of updating a locally installed EXE, see [BUILD.md](BUILD.md).
 
-## 配置 | Configuration
+## 配置
 
 无配置文件需要手工编辑；所有数据自动生成于 `D:\电脑使用时间统计数据\`：
-No manual configuration is required; everything is auto-generated under `D:\电脑使用时间统计数据\`:
 
-| 文件 File | 说明 Description |
+| 文件 | 说明 |
 |---|---|
-| `usage.json` | 全部统计数据，v2 格式：按天记录各应用秒数（`Apps`）与按小时分布（`Hours`），只保留最近 7 天，旧 v1 数据自动迁移。All statistics: per-day app seconds (`Apps`) and hourly distribution (`Hours`), 7-day retention, auto-migrated from v1. |
-| `settings.json` | 小组件与详细窗口的位置、尺寸记忆。Remembered position/size of the widget and detail window. |
-| `数据格式说明.txt` | 程序自动生成的数据格式文档。A data-format doc auto-generated by the app. |
+| `usage.json` | 全部统计数据，v2 格式：按天记录各应用秒数（`Apps`）与按小时分布（`Hours`），只保留最近 7 天，旧 v1 数据自动迁移 |
+| `settings.json` | 小组件与详细窗口的位置、尺寸记忆 |
+| `数据格式说明.txt` | 程序自动生成的数据格式文档 |
 
 `usage.json` 为纯 JSON，可直接编辑或备份；改完重启程序生效，格式损坏时程序会从空数据开始。
+
+## 说明
+
+- **本机构建不会自动更新已安装的 EXE**：`dotnet build / publish` 只输出到项目的 `bin/`、`publish/` 目录；若你已把 EXE 安装在固定位置（如 `D:\电脑使用时间统计.exe`），更新需手动复制发布产物覆盖它——覆盖前先在任务管理器结束进程，否则文件被占用
+- **结束程序**：界面无退出入口（刻意防呆），需要时在任务管理器结束"电脑使用时间统计"进程。强杀最多丢最近 30 秒统计（数据每 30 秒节流落盘）
+- **Win+D（显示桌面）**：程序会拦截最小化并自动恢复到桌面层；在装有桌面美化/壁纸类软件（非标准桌面 Shell 结构）的系统上可能仍会被隐藏
+- **统计精度**：基于每 2 秒一次的前台窗口轮询，非内核级追踪；个别 UWP 全屏应用归属可能不精确
+- 纯本地运行，无任何网络请求，不上传任何数据
+
+## 技术栈
+
+- .NET 9 / C# / WPF（`UseWindowsForms` 仅用于托盘图标）
+- 直接 P/Invoke Win32：`GetForegroundWindow`、`SetWindowPos`、`GetCursorPos` 等
+- 图标由 256×256 PNG 生成多尺寸 ICO（16–256）
+
+---
+
+# English
+
+> A Windows desktop widget that mimics the phone "Screen Time" card: it stays on your desktop layer and tracks how long each app has been in the foreground, with automatic dark/light theme.
+
+[简体中文](#电脑使用时间统计--pc-screen-time-stats) · **English**
+
+## Download
+
+Latest release (self-contained single file, no .NET install needed—just download and run):
+
+- [Latest](https://github.com/JegXiao/pc-usage-time-stats/releases/latest)
+- [Direct link (fixed filename)](https://github.com/JegXiao/pc-usage-time-stats/releases/latest/download/PCUsageTimeStats.exe)
+
+The EXE filename is fixed: to upgrade, overwrite the old file with the new one—the process name and autostart path never change. Version numbers live in Release tags and the EXE file properties.
+
+## Features
+
+- **Desktop widget**: a borderless rounded card that lives on the desktop layer; regular windows cover it automatically. No taskbar entry, never steals focus (`WS_EX_NOACTIVATE`)
+- **Phone-style accounting**: only the foreground app accumulates time. Background apps and sleep/lock time are excluded, and the widget never counts itself
+- **Detail window**: Today (24-hour bars, y-axis locked at 60 min with gridlines every 10 min, peak-hour hint) / Last 7 days / Last 30 days (scaled to peak, hourly gridlines—thick on even hours, thin on odd—plus a blue daily-average line), plus a Top-12 app ranking with progress bars and instant tooltips
+- **Auto dark/light theme**: listens to `WM_SETTINGCHANGE`; switches instantly without restart
+- **Drag & resize**: jitter-free dragging via screen-absolute coordinates; a small ⤷ button enters resize mode (8 grip handles). Everything is clamped to the working area, and both windows remember their position and size
+- **Fool-proof**: tray icon is display-only (no menu), there is no in-app exit, and autostart is always enforced via the `HKCU` Run key (no admin rights needed)
+- **Single instance**: launching it again just summons the running window instead of starting a copy
+
+## Quick Start
+
+### Requirements
+
+- Windows 10 / 11
+- [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0)
+- A D: drive (the data folder is fixed at `D:\电脑使用时间统计数据\`)
+
+### Build from source
+
+```bash
+git clone https://github.com/JegXiao/pc-usage-time-stats.git
+cd pc-usage-time-stats
+
+# development build
+dotnet build
+
+# publish a single-file exe (~400 KB) to 电脑使用时间统计/bin/publish/
+dotnet publish 电脑使用时间统计/电脑使用时间统计.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o 电脑使用时间统计/bin/publish
+```
+
+Just run the exe: a tray icon appears and the widget shows up at the top-left of your desktop. Put the exe in a permanent location (e.g. `D:\`)—the autostart registry entry is refreshed on every launch.
+
+> Tip: the framework-dependent build requires the .NET 9 Desktop Runtime; switch to `--self-contained true` for a zero-dependency file (~150 MB).
+
+For the differences between output directories and the caveats of updating a locally installed EXE, see [BUILD.md](BUILD.md).
+
+## Configuration
+
+No manual configuration is required; everything is auto-generated under `D:\电脑使用时间统计数据\`:
+
+| File | Description |
+|---|---|
+| `usage.json` | All statistics, v2 format: per-day app seconds (`Apps`) and hourly distribution (`Hours`), 7-day retention, auto-migrated from v1 |
+| `settings.json` | Remembered position/size of the widget and detail window |
+| `数据格式说明.txt` | A data-format doc auto-generated by the app |
+
 `usage.json` is plain JSON and can be edited or backed up directly; restart the app to apply. If the file is corrupted the app starts from empty data.
 
-## 说明 | Notes
+## Notes
 
-- **本机构建不会自动更新已安装的 EXE**：`dotnet build / publish` 只输出到项目的 `bin/`、`publish/` 目录；若你已把 EXE 安装在固定位置（如 `D:\电脑使用时间统计.exe`），更新需手动复制发布产物覆盖它——覆盖前先在任务管理器结束进程，否则文件被占用。
-  **Building locally never overwrites an installed EXE**: `dotnet build / publish` only writes to the project's `bin/` and `publish/` folders. If you installed the EXE somewhere fixed (e.g. `D:\电脑使用时间统计.exe`), copy the published file over it manually—stop the process first or the file will be locked.
-- **结束程序**：界面无退出入口（刻意防呆），需要时在任务管理器结束"电脑使用时间统计"进程。强杀最多丢最近 30 秒统计（数据每 30 秒节流落盘）。
-  **Exiting**: there is deliberately no in-app exit; end the "电脑使用时间统计" process from Task Manager if needed. A force-kill loses at most the last 30 s (data is flushed on a 30 s throttle).
-- **Win+D（显示桌面）**：程序会拦截最小化并自动恢复到桌面层；在装有桌面美化/壁纸类软件（非标准桌面 Shell 结构）的系统上可能仍会被隐藏。
-  **Win+D (Show Desktop)**: the widget intercepts minimize and restores itself onto the desktop; on systems with desktop-customization software (non-standard shell) it may still get hidden.
-- **统计精度**：基于每 2 秒一次的前台窗口轮询，非内核级追踪；个别 UWP 全屏应用归属可能不精确。
-  **Accuracy**: based on 2-second foreground-window polling, not kernel tracing; attribution for some full-screen UWP apps can be imprecise.
-- 纯本地运行，无任何网络请求，不上传任何数据。
-  Runs fully offline—no network requests, nothing leaves your machine.
+- **Building locally never overwrites an installed EXE**: `dotnet build / publish` only writes to the project's `bin/` and `publish/` folders. If you installed the EXE somewhere fixed (e.g. `D:\电脑使用时间统计.exe`), copy the published file over it manually—stop the process first or the file will be locked
+- **Exiting**: there is deliberately no in-app exit; end the "电脑使用时间统计" process from Task Manager if needed. A force-kill loses at most the last 30 s (data is flushed on a 30 s throttle)
+- **Win+D (Show Desktop)**: the widget intercepts minimize and restores itself onto the desktop; on systems with desktop-customization software (non-standard shell) it may still get hidden
+- **Accuracy**: based on 2-second foreground-window polling, not kernel tracing; attribution for some full-screen UWP apps can be imprecise
+- Runs fully offline—no network requests, nothing leaves your machine
 
-## 技术栈 | Tech Stack
+## Tech Stack
 
-- .NET 9 / C# / WPF（`UseWindowsForms` 仅用于托盘图标 | `UseWindowsForms` only for the tray icon）
-- 直接 P/Invoke Win32：`GetForegroundWindow`、`SetWindowPos`、`GetCursorPos` 等
-  Direct Win32 P/Invoke: `GetForegroundWindow`, `SetWindowPos`, `GetCursorPos`, etc.
-- 图标由 256×256 PNG 生成多尺寸 ICO（16–256） | Icon: multi-size ICO (16–256) generated from a 256×256 PNG
+- .NET 9 / C# / WPF (`UseWindowsForms` only for the tray icon)
+- Direct Win32 P/Invoke: `GetForegroundWindow`, `SetWindowPos`, `GetCursorPos`, etc.
+- Icon: multi-size ICO (16–256) generated from a 256×256 PNG
