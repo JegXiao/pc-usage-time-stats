@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <UseWindowsForms>true</UseWindowsForms>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>ComputerUsageStats</RootNamespace>
+        <ApplicationIcon>app.ico</ApplicationIcon>
+        <Version>2.2.0.0</Version>
+        <FileVersion>2.2.0.0</FileVersion>
+        <ProductVersion>2.2</ProductVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Resource Include="app.ico"/>
+    </ItemGroup>
+
+</Project>

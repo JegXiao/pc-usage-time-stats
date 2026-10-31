@@ -1,0 +1,15 @@
+# 构建产物
+bin/
+obj/
+publish/
+*.user
+
+# IDE
+.idea/
+
+# ZCode 会话数据
+.zcode/
+
+# 运行时数据（小组件实际数据存于 D:\电脑使用时间统计数据\，不入库）
+usage.json
+settings.json

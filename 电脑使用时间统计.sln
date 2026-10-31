@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "电脑使用时间统计", "电脑使用时间统计\电脑使用时间统计.csproj", "{304242AF-7BFE-4671-9135-8B06911CE008}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{304242AF-7BFE-4671-9135-8B06911CE008}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{304242AF-7BFE-4671-9135-8B06911CE008}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{304242AF-7BFE-4671-9135-8B06911CE008}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{304242AF-7BFE-4671-9135-8B06911CE008}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
