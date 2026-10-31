@@ -1,0 +1,49 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      # 版本号只读 csproj 一处，文件名与本机版本永远同源
+      - name: Read version from csproj
+        id: ver
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path '电脑使用时间统计/电脑使用时间统计.csproj' -Pattern '<Version>(.*?)</Version>').Matches[0].Groups[1].Value
+          $short = ($v.Split('.')[0..1]) -join '.'
+          "full=$v" >> $env:GITHUB_OUTPUT
+          "short=$short" >> $env:GITHUB_OUTPUT
+
+      - name: Publish self-contained single-file EXE
+        run: dotnet publish '电脑使用时间统计/电脑使用时间统计.csproj' -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+
+      - name: Rename with version
+        shell: pwsh
+        run: Copy-Item 'publish/电脑使用时间统计.exe' "PCUsageTimeStats${{ steps.ver.outputs.short }}.exe"
+
+      # 标签触发用推送的标签名；手动触发按 csproj 版本号生成
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { "v" + "${{ steps.ver.outputs.short }}" }
+          $exe = "PCUsageTimeStats${{ steps.ver.outputs.short }}.exe"
+          $notes = "自包含单文件, 下载后双击即用 | Self-contained single file, download and run`n`n首次启动解压本地库稍慢 1-2 秒属正常 | First launch may take 1-2 s longer while native libraries extract`n`n未签名 EXE 可能触发 SmartScreen: 点【更多信息】-【仍要运行】 | Unsigned EXE may trigger SmartScreen: click More info - Run anyway"
+          gh release create "$tag" "$exe" --title "$tag" --notes "$notes" 2>$null
+          if ($LASTEXITCODE -ne 0) { gh release upload "$tag" "$exe" --clobber }

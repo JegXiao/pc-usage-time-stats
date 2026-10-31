@@ -3,6 +3,16 @@
 > 仿手机"屏幕使用时间"的 Windows 桌面小组件：常驻桌面层，实时统计各应用的前台使用时长，深浅色主题自动跟随系统。
 > A Windows desktop widget that mimics the phone "Screen Time" card: it stays on your desktop layer and tracks how long each app has been in the foreground, with automatic dark/light theme.
 
+[![Build and Release](https://github.com/JegXiao/pc-usage-time-stats/actions/workflows/release.yml/badge.svg)](https://github.com/JegXiao/pc-usage-time-stats/actions/workflows/release.yml)
+
+## 下载 | Download
+
+最新版（自包含单文件，无需安装 .NET，下载后双击即用）：
+Latest release (self-contained single file, no .NET install needed—just download and run):
+
+- [最新版 | Latest](https://github.com/JegXiao/pc-usage-time-stats/releases/latest)
+- [v2.3 直链 | v2.3 direct link](https://github.com/JegXiao/pc-usage-time-stats/releases/download/v2.3/PCUsageTimeStats2.3.exe)
+
 ![截图占位 | Screenshots placeholder](#)
 
 ## 功能特性 | Features
