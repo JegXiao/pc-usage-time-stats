@@ -2,7 +2,7 @@
 
 > 仿手机"屏幕使用时间"的 Windows 桌面小组件：常驻桌面层，实时统计各应用的前台使用时长，深浅色主题自动跟随系统。
 
-**简体中文** · [ English](#english)
+**中文** · [ English](#english)
 
 ---
 
@@ -86,7 +86,7 @@ dotnet publish 电脑使用时间统计/电脑使用时间统计.csproj -c Relea
 
 > A Windows desktop widget that mimics the phone "Screen Time" card: it stays on your desktop layer and tracks how long each app has been in the foreground, with automatic dark/light theme.
 
-[简体中文](#电脑使用时间统计--pc-screen-time-stats) · **English**
+[中文](#电脑使用时间统计--pc-screen-time-stats) · **English**
 
 ## Download
 
