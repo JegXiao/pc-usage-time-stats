@@ -9,9 +9,9 @@
         <Nullable>enable</Nullable>
         <RootNamespace>ComputerUsageStats</RootNamespace>
         <ApplicationIcon>app.ico</ApplicationIcon>
-        <Version>2.3.0.0</Version>
-        <FileVersion>2.3.0.0</FileVersion>
-        <ProductVersion>2.3</ProductVersion>
+        <Version>2.4.0.0</Version>
+        <FileVersion>2.4.0.0</FileVersion>
+        <ProductVersion>2.4</ProductVersion>
     </PropertyGroup>
 
     <ItemGroup>

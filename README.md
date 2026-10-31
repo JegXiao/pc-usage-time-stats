@@ -11,9 +11,10 @@
 Latest release (self-contained single file, no .NET install needed—just download and run):
 
 - [最新版 | Latest](https://github.com/JegXiao/pc-usage-time-stats/releases/latest)
-- [v2.3 直链 | v2.3 direct link](https://github.com/JegXiao/pc-usage-time-stats/releases/download/v2.3/PCUsageTimeStats2.3.exe)
+- [最新版直链（文件名恒定） | Direct link (fixed filename)](https://github.com/JegXiao/pc-usage-time-stats/releases/latest/download/PCUsageTimeStats.exe)
 
-![截图占位 | Screenshots placeholder](#)
+EXE 文件名恒定：升级时用新版覆盖旧文件即可，进程名与开机自启路径不变。版本号见 Release 标签与 EXE 文件属性。
+The EXE filename is fixed: to upgrade, overwrite the old file with the new one—the process name and autostart path never change. Version numbers live in Release tags and the EXE file properties.
 
 ## 功能特性 | Features
 
@@ -77,6 +78,8 @@ No manual configuration is required; everything is auto-generated under `D:\电�
 
 ## 说明 | Notes
 
+- **本机构建不会自动更新已安装的 EXE**：`dotnet build / publish` 只输出到项目的 `bin/`、`publish/` 目录；若你已把 EXE 安装在固定位置（如 `D:\电脑使用时间统计.exe`），更新需手动复制发布产物覆盖它——覆盖前先在任务管理器结束进程，否则文件被占用。
+  **Building locally never overwrites an installed EXE**: `dotnet build / publish` only writes to the project's `bin/` and `publish/` folders. If you installed the EXE somewhere fixed (e.g. `D:\电脑使用时间统计.exe`), copy the published file over it manually—stop the process first or the file will be locked.
 - **结束程序**：界面无退出入口（刻意防呆），需要时在任务管理器结束"电脑使用时间统计"进程。强杀最多丢最近 30 秒统计（数据每 30 秒节流落盘）。
   **Exiting**: there is deliberately no in-app exit; end the "电脑使用时间统计" process from Task Manager if needed. A force-kill loses at most the last 30 s (data is flushed on a 30 s throttle).
 - **Win+D（显示桌面）**：程序会拦截最小化并自动恢复到桌面层；在装有桌面美化/壁纸类软件（非标准桌面 Shell 结构）的系统上可能仍会被隐藏。
