@@ -13,3 +13,6 @@ publish/
 # 运行时数据（小组件实际数据存于 D:\电脑使用时间统计数据\，不入库）
 usage.json
 settings.json
+
+# 维护者私有文档（发版流程等，不入库）
+RELEASE.private.md

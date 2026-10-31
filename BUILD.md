@@ -49,39 +49,8 @@ copy /Y 电脑使用时间统计/bin/publish/电脑使用时间统计.exe D:\电
 - 本机版是框架依赖（约 400 KB，需 .NET 9 桌面运行时）；想要零依赖单文件，把 `--self-contained false` 改为 `true`（约 150 MB）。
   The local build is framework-dependent (~400 KB, needs the .NET 9 Desktop Runtime); switch `--self-contained false` to `true` for a zero-dependency file (~150 MB).
 
-## 流程 B：发布 GitHub Release（云端自动编译） | Flow B: publish a GitHub Release (cloud build)
-
-推送版本标签后 GitHub Actions 会自动编译**自包含**单文件并挂到 Release，附件名恒定为 `PCUsageTimeStats.exe`。
-Pushing a version tag triggers GitHub Actions to build a **self-contained** single file and attach it to a Release with the fixed asset name `PCUsageTimeStats.exe`.
-
-```bash
-# 1. 提交并推送代码（提交信息用 feat:/fix: + 中文描述）
-# 1. Commit and push (message style: feat:/fix: + Chinese description)
-git add -A
-git commit -m "feat: 功能描述 vX.Y"
-git push origin main
-
-# 2. 打标签并推送 —— 触发 Actions（工作流见 .github/workflows/release.yml）
-# 2. Tag and push — this triggers Actions (see .github/workflows/release.yml)
-git tag vX.Y
-git push origin vX.Y
-```
-
-**注意事项 | Caveats**
-
-- 附件名恒定（不带版本号）：下载者用新版覆盖旧文件即完成升级，进程名与自启路径不变；版本号看 Release 标签与 EXE 文件属性。
-  The asset name is fixed (no version in the filename): upgrading = overwriting the old file, so the process name and autostart path never change; the version lives in the release tag and EXE file properties.
-- **标签触发的是它指向的那次提交**：修完工作流或发现发错版本后，必须删除远端旧标签重打再推，否则跑的还是旧提交。
-  **A tag builds the commit it points to**: if you fix the workflow or tagged the wrong commit, delete the remote tag, re-tag and push again—otherwise Actions reruns the old commit.
-  ```bash
-  git tag -d vX.Y && git push origin :refs/tags/vX.Y   # 删旧标签 | delete the old tag
-  ```
-- 工作流进度：`gh run list --limit 1` → `gh run watch <id> --exit-status`；失败看 `gh run view <id> --log-failed`。
-  Progress: `gh run list --limit 1` → `gh run watch <id> --exit-status`; on failure inspect `gh run view <id> --log-failed`.
-- Release 幂等：工作流里 `gh release create` 失败会自动转 `gh release upload --clobber`，重跑不炸。
-  Releases are idempotent: on failure the workflow falls back to `gh release upload --clobber`, so reruns are safe.
-- 云端产物是自包含版（约 71 MB，双击即用），与本机的框架依赖版是两种形态，互不影响。
-  The cloud artifact is self-contained (~71 MB, runs out of the box), a different flavor from the local framework-dependent build; they do not interfere.
+> 项目的 GitHub Release 由维护者推送版本标签后经 Actions 自动发布，工作流定义（含注释）见 [.github/workflows/release.yml](.github/workflows/release.yml)。
+> GitHub Releases are published automatically by Actions when the maintainer pushes a version tag; see [.github/workflows/release.yml](.github/workflows/release.yml) for the annotated workflow definition.
 
 ## 单实例与测试 | Single instance & testing
 

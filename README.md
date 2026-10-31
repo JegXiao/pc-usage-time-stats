@@ -62,8 +62,8 @@ Just run the exe: a tray icon appears and the widget shows up at the top-left of
 > 提示：框架依赖发布需要 .NET 9 桌面运行时；如需零依赖单文件，把上面命令改为 `--self-contained true`（体积约 150 MB）。
 > Tip: the framework-dependent build requires the .NET 9 Desktop Runtime; switch to `--self-contained true` for a zero-dependency file (~150 MB).
 
-输出目录的区别、本机安装更新、以及打标签触发云端发布的完整流程，见 [BUILD.md](BUILD.md)。
-For the differences between output directories, updating a locally installed EXE, and the full tag-driven cloud release flow, see [BUILD.md](BUILD.md).
+输出目录的区别与本机安装更新的注意事项，见 [BUILD.md](BUILD.md)。
+For the differences between output directories and caveats of updating a locally installed EXE, see [BUILD.md](BUILD.md).
 
 ## 配置 | Configuration
 
