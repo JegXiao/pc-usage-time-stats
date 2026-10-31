@@ -10,6 +10,7 @@ public partial class App : System.Windows.Application
 
     private Mutex? _singleInstanceMutex;
     private EventWaitHandle? _showEvent;
+    private bool _ownsMutex;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -29,6 +30,8 @@ public partial class App : System.Windows.Application
             Shutdown();
             return;
         }
+
+        _ownsMutex = true;
 
         try
         {
@@ -54,8 +57,13 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        _singleInstanceMutex?.ReleaseMutex();
+        // 只有真正持有互斥体的第一实例才能 Release；第二实例从未获得所有权
+        if (_ownsMutex)
+        {
+            try { _singleInstanceMutex?.ReleaseMutex(); } catch { }
+        }
         _singleInstanceMutex?.Dispose();
+        _showEvent?.Dispose();
         base.OnExit(e);
     }
 }

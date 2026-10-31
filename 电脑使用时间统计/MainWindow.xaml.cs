@@ -39,7 +39,6 @@ public partial class MainWindow : Window
     private DateTime _lastPoll = DateTime.Now;
     private DateOnly _viewDate = DateOnly.FromDateTime(DateTime.Today);
     private WinForms.NotifyIcon? _trayIcon;
-    private bool _realExit;
 
     public MainWindow()
     {
@@ -584,16 +583,8 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
-        if (!_realExit)
-        {
-            // 点关闭 = 最小化到托盘，统计继续
-            e.Cancel = true;
-            Hide();
-            return;
-        }
-
-        _store.SaveNow();
-        _trayIcon?.Dispose();
-        base.OnClosing(e);
+        // 关闭 = 隐藏到托盘，统计继续（程序无界面退出入口）
+        e.Cancel = true;
+        Hide();
     }
 }
