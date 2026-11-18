@@ -16,6 +16,12 @@ public class AppUsageTracker
     [DllImport("user32.dll")]
     private static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
 
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetShellWindow();
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetClassName(IntPtr hWnd, StringBuilder name, int count);
+
     /// <summary>前台应用变化时触发（进程名, 显示名, 窗口标题）。</summary>
     public event Action<string, string, string>? ForegroundAppChanged;
 
@@ -33,7 +39,28 @@ public class AppUsageTracker
         if (pid == Environment.ProcessId)
             return;
 
+        // 选项：不统计锁屏界面（锁屏时前台是 LockApp.exe，会白算待机时间）
+        if (AppSettings.Instance.ExcludeLockApp &&
+            (procName.Equals("LockApp", StringComparison.OrdinalIgnoreCase) ||
+             display.StartsWith("LockApp", StringComparison.OrdinalIgnoreCase)))
+            return;
+
+        // 选项：只显示桌面（无窗口激活）时不统计
+        if (AppSettings.Instance.SkipDesktopOnly && IsDesktopWindow(GetForegroundWindow()))
+            return;
+
         store.AddSeconds(now.ToString("yyyy-MM-dd"), now.Hour, display, (long)Math.Round(intervalSeconds));
+    }
+
+    /// <summary>判断窗口是否为桌面本身（点桌面、Win+D 之后的前台窗口）。</summary>
+    private static bool IsDesktopWindow(IntPtr hwnd)
+    {
+        if (hwnd == IntPtr.Zero) return false;
+        if (hwnd == GetShellWindow()) return true;
+
+        var name = new StringBuilder(64);
+        GetClassName(hwnd, name, 64);
+        return name.ToString() is "Progman" or "WorkerW";
     }
 
     private (uint pid, string? procName, string displayName) GetForegroundApp()

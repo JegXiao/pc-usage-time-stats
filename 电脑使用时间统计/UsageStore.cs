@@ -87,7 +87,7 @@ public class UsageStore
             for (int i = n - 1; i >= 0; i--)
             {
                 var key = DateTime.Today.AddDays(-i).ToString("yyyy-MM-dd");
-                long total = _data.Days.TryGetValue(key, out var d) ? d.Apps.Values.Sum() : 0;
+                long total = _data.Days.TryGetValue(key, out var d) ? SumApps(d.Apps) : 0;
                 result.Add((key, total));
             }
             return result;
@@ -105,11 +105,22 @@ public class UsageStore
                 var key = DateTime.Today.AddDays(-i).ToString("yyyy-MM-dd");
                 if (!_data.Days.TryGetValue(key, out var d)) continue;
                 foreach (var (app, secs) in d.Apps)
+                {
+                    if (IsFilteredApp(app)) continue;
                     agg[app] = agg.TryGetValue(app, out var v) ? v + secs : secs;
+                }
             }
             return agg.OrderByDescending(kv => kv.Value).Select(kv => (kv.Key, kv.Value)).ToList();
         }
     }
+
+    /// <summary>按当前选项是否隐藏某应用（锁屏）。</summary>
+    private static bool IsFilteredApp(string appName) =>
+        AppSettings.Instance.ExcludeLockApp &&
+        appName.StartsWith("LockApp", StringComparison.OrdinalIgnoreCase);
+
+    private static long SumApps(Dictionary<string, long> apps) =>
+        apps.Where(kv => !IsFilteredApp(kv.Key)).Sum(kv => kv.Value);
 
     public void AddSeconds(string dateKey, int hour, string appName, long seconds)
     {
@@ -131,11 +142,14 @@ public class UsageStore
         SaveNow();
     }
 
+    /// <summary>保留天数：需覆盖"过去30天"视图，留 5 天余量。</summary>
+    private const int RetentionDays = 35;
+
     public void SaveNow()
     {
         lock (_lock)
         {
-            var cutoff = DateTime.Today.AddDays(-6).ToString("yyyy-MM-dd");
+            var cutoff = DateTime.Today.AddDays(-(RetentionDays - 1)).ToString("yyyy-MM-dd");
             foreach (var old in _data.Days.Keys.Where(k => string.Compare(k, cutoff, StringComparison.Ordinal) < 0).ToList())
                 _data.Days.Remove(old);
 
@@ -154,11 +168,18 @@ public class UsageStore
         }
     }
 
-    private static DayData Copy(DayData d) => new()
+    private static DayData Copy(DayData d)
     {
-        Apps = new Dictionary<string, long>(d.Apps),
-        Hours = new Dictionary<string, long>(d.Hours),
-    };
+        var apps = new Dictionary<string, long>(d.Apps);
+        foreach (var key in apps.Keys.Where(IsFilteredApp).ToList())
+            apps.Remove(key);
+
+        return new DayData
+        {
+            Apps = apps,
+            Hours = new Dictionary<string, long>(d.Hours),
+        };
+    }
 
     /// <summary>数据交换规范说明，随数据文件一同维护。</summary>
     private static void WriteSpecDoc()
@@ -186,7 +207,7 @@ public class UsageStore
 
             规则：
             - 应用显示名优先取 exe 的文件描述（与小组件列表一致），否则为进程名。
-            - 只保留最近 7 天，更早的日期在保存时自动清理。
+            - 保留最近 35 天（覆盖"过去30天"视图），更早的日期在保存时自动清理。
             - v1 旧格式（无 Version 字段、Apps 与 Hours 未分）会在读取时自动迁移。
             - 手动修改 JSON 后重启小组件即可生效；格式错误时程序会从空数据开始，
               因此编辑前请先备份。

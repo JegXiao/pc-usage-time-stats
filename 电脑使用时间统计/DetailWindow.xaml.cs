@@ -39,8 +39,34 @@ public partial class DetailWindow : Window
             Top = AppSettings.Instance.DetailTop;
         }
 
+        // 统计选项（回填当前设置）
+        _optionsLoading = true;
+        ChkExcludeLockApp.IsChecked = AppSettings.Instance.ExcludeLockApp;
+        ChkSkipDesktop.IsChecked = AppSettings.Instance.SkipDesktopOnly;
+        _optionsLoading = false;
+
         ApplyTheme();
         SwitchTab(0);
+    }
+
+    private bool _optionsLoading;
+
+    /// <summary>窗口/画布尺寸变化时只重绘图表（不动排行，避免滚动条抖动引发循环重绘）。</summary>
+    private void ChartCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (e.NewSize.Width <= 10 || !IsLoaded) return;
+        if (_currentTab == 0) RefreshToday();
+        else if (_currentTab == 1) RefreshWeek();
+        else RefreshMonth();
+    }
+
+    private void Option_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_optionsLoading) return;
+        AppSettings.Instance.ExcludeLockApp = ChkExcludeLockApp.IsChecked == true;
+        AppSettings.Instance.SkipDesktopOnly = ChkSkipDesktop.IsChecked == true;
+        AppSettings.SaveOptions();
+        Refresh();
     }
 
     protected override void OnClosed(EventArgs e)
@@ -148,24 +174,28 @@ public partial class DetailWindow : Window
         var gridBrush = (Brush)FindResource("BarRestBrush");
         var textBrush = (Brush)FindResource("SubTextBrush");
 
-        // 每10分钟一条横坐标线
+        // 右侧留出纵轴标注区，网格线/柱子只用左侧绘图区
+        const double axisWidth = 30;
+        double plotWidth = width > axisWidth + 80 ? width - axisWidth : width;
+
+        // 每10分钟一条横坐标线，右侧标注刻度
         for (int m = 10; m <= 60; m += 10)
         {
             double y = height - m * minuteHeight;
-            var line = new Rectangle { Width = width, Height = 1, Fill = gridBrush, Opacity = 0.4 };
+            var line = new Rectangle { Width = plotWidth, Height = 1, Fill = gridBrush, Opacity = 0.4 };
             Canvas.SetLeft(line, 0);
             Canvas.SetTop(line, y);
             ChartCanvas.Children.Add(line);
 
             var tb = new TextBlock { Text = $"{m}", FontSize = 9, Foreground = textBrush };
-            Canvas.SetLeft(tb, width - 20);
-            Canvas.SetTop(tb, y - 8);
-            ChartLabels.Children.Add(tb);
+            Canvas.SetLeft(tb, plotWidth + 4);
+            Canvas.SetTop(tb, Math.Max(0, y - 6));
+            ChartCanvas.Children.Add(tb);
         }
 
         var barBrush = new SolidColorBrush(BarColor);
         int n = values.Count;
-        double slot = width / n;
+        double slot = plotWidth / n;
         double barW = Math.Max(slot - 3, 2);
 
         for (int i = 0; i < n; i++)
@@ -190,7 +220,7 @@ public partial class DetailWindow : Window
         {
             var tb = new TextBlock { Text = $"{i:00}", FontSize = 9, Foreground = textBrush };
             Canvas.SetLeft(tb, i * slot);
-            Canvas.SetTop(tb, height + 4);
+            Canvas.SetTop(tb, 0);
             ChartLabels.Children.Add(tb);
         }
     }
@@ -236,16 +266,20 @@ public partial class DetailWindow : Window
         var gridBrush = (Brush)FindResource("BarRestBrush");
         var textBrush = (Brush)FindResource("SubTextBrush");
 
-        // 坐标线：每1小时一条，双数小时粗线，单数小时细线
+        // 右侧留出纵轴标注区
+        const double axisWidth = 30;
+        double plotWidth = width > axisWidth + 80 ? width - axisWidth : width;
+
+        // 坐标线：每1小时一条，双数小时粗线、单数细线；纵轴在双数小时处标刻度
         double maxHours = max / 3600;
-        int gridCount = (int)Math.Ceiling(maxHours);
+        int gridCount = (int)Math.Floor(maxHours);
         for (int h = 1; h <= gridCount; h++)
         {
             double y = height - (h * 3600 / max) * (height - 12);
             bool even = h % 2 == 0;
             var line = new Rectangle
             {
-                Width = width,
+                Width = plotWidth,
                 Height = even ? 1.2 : 0.6,
                 Fill = gridBrush,
                 Opacity = even ? 0.6 : 0.25
@@ -253,6 +287,15 @@ public partial class DetailWindow : Window
             Canvas.SetLeft(line, 0);
             Canvas.SetTop(line, y);
             ChartCanvas.Children.Add(line);
+
+            // 双数小时标刻度（单数太密）；最大不足2小时时只标1小时线
+            if (even || gridCount == 1)
+            {
+                var tb = new TextBlock { Text = $"{h}", FontSize = 9, Foreground = textBrush };
+                Canvas.SetLeft(tb, plotWidth + 4);
+                Canvas.SetTop(tb, Math.Max(0, y - 6));
+                ChartCanvas.Children.Add(tb);
+            }
         }
 
         // 平均值蓝线
@@ -261,7 +304,7 @@ public partial class DetailWindow : Window
             double yAvg = height - (avgSeconds / max) * (height - 12);
             var avgLine = new Rectangle
             {
-                Width = width,
+                Width = plotWidth,
                 Height = 1.5,
                 Fill = new SolidColorBrush(AvgColor)
             };
@@ -272,7 +315,7 @@ public partial class DetailWindow : Window
 
         var barBrush = new SolidColorBrush(BarColor);
         int n = values.Count;
-        double slot = width / n;
+        double slot = plotWidth / n;
         double barW = Math.Max(slot - 3, 2);
         var culture = CultureInfo.CurrentCulture;
 
@@ -298,8 +341,8 @@ public partial class DetailWindow : Window
             // 底部日期标签
             string label = dt == DateTime.Today ? "今" : dt.Day.ToString();
             var tb = new TextBlock { Text = label, FontSize = 9, Foreground = textBrush };
-            Canvas.SetLeft(tb, i * slot + (slot - 20) / 2);
-            Canvas.SetTop(tb, height + 4);
+            Canvas.SetLeft(tb, Math.Max(0, i * slot + (slot - 14) / 2));
+            Canvas.SetTop(tb, 0);
             ChartLabels.Children.Add(tb);
         }
     }
